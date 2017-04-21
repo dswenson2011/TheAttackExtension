@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .main {
+            padding: 10px;
+        }
+
+        .background {
+            color: rgba(255, 255, 255, 1);
+            background: rgba(0, 0, 0, 1);
+            width: 350px;
+            height: 200px;
+            font-family: Helvetica, Ubuntu, Arial, sans-serif;
+            display: none;
+            opacity: 0;
+        }
+
+        .logo {
+            display: block;
+            background: url('assets/logo.png') no-repeat center center;
+            background-size: contain;
+            width: 108px;
+            height: 100px;
+            margin: 0 auto;
+        }
+
+        .subtitle {
+            text-align: center;
+        }
+
+        .footer {
+            margin: 20px 0 0;
+            text-align: center;
+        }
+
+        .footer-image {
+            background-size: contain;
+            background-position: center center;
+            width: 160px;
+            height: 43px;
+            display: inline-block;
+        }
+
+        .footer-image:first-child {
+            margin-right: 5px;
+        }
+
+        .footer-image[data-image='patreon'] {
+            background-image: url('assets/patreon.png');
+        }
+
+        .footer-image[data-image='streamlab'] {
+            background-image: url('assets/streamlab.png');
+        }
+    </style>
+</head>
+<body class='background'>
+<div class='main'>
+    <header id='header'>
+        <a href='https://www.theattack.tv/' tabindex='-1' target='_blank' class='logo'></a>
+        <div class='subtitle'>
+            <h2>The Attack Streaming Schedule</h2>
+            <pre>All times are local</pre>
+        </div>
+    </header>
+
+    <div id='monday'>
+        <h3>Monday</h3>
+        <ul id='monday-list'></ul>
+    </div>
+
+    <div id='tuesday'>
+        <h3>Tuesday</h3>
+        <ul id='tuesday-list'></ul>
+    </div>
+
+    <div id='wednesday'>
+        <h3>Wednesday</h3>
+        <ul id='wednesday-list'></ul>
+    </div>
+
+    <div id='thursday'>
+        <h3>Thursday</h3>
+        <ul id='thursday-list'></ul>
+    </div>
+
+    <div id='friday'>
+        <h3>Friday</h3>
+        <ul id='friday-list'></ul>
+    </div>
+
+    <footer class='footer'>
+        <a class='footer-image' data-image='streamlab' href='https://twitch.streamlabs.com/theattack' tabindex='-1'
+           target='_blank' title='Tip Jar'></a>
+        <a class='footer-image' data-image='patreon' href='https://www.patreon.com/theattack' tabindex='-1'
+           target='_blank' title='Patreon'></a>
+    </footer>
+</div>
+<script type='text/javascript' src='node_modules/jquery/dist/jquery.min.js'></script>
+<script type='text/javascript' src='js/main.js'></script>
+</body>
+</html>
