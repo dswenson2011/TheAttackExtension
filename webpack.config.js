@@ -3,6 +3,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 module.exports = {
+    devtool: 'source-map',
     entry: './js/main.js',
     output: {
         filename: 'bundle.js',
@@ -21,5 +22,6 @@ module.exports = {
             {from: './manifest.json'},
             {from: './assets/', to: './assets/'},
             {from: './assets/icon/', to: './assets/icon/'}
-        ])]
+        ])
+    ]
 };

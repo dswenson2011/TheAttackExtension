@@ -10,6 +10,12 @@ const DAY_MAP = {
 
 const COMMENT_REGEX = /.+?(?=Monday|Tuesday|Wednesday|Thursday|Friday)/;
 
+/**
+ *
+ * @param {string} title
+ * @param {string} message
+ * @param {string} icon
+ */
 const createNotification = ({title = 'The Attack', message, icon = '128'}) => {
     chrome.notifications.create('alert', {
         type: 'basic',
@@ -19,6 +25,11 @@ const createNotification = ({title = 'The Attack', message, icon = '128'}) => {
     });
 };
 
+/**
+ *
+ * @param {string} title
+ * @param {string} message
+ */
 const createLiveNotification = ({title = 'The Attack', message}) => {
     createNotification({title: title, message: message, icon: 'live'});
 };

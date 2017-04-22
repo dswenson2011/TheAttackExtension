@@ -1,192 +1,96 @@
 'use strict';
 
 import {Schedule} from './schedule';
+import {Tabs} from './tabs';
+import {VOD} from './vod';
 import {GoogleAnalytics} from './googleanalytics';
-import {createNotification} from './utils';
-
-
-// class Tabs {
-//     constructor() {
-//         this.cache = [];
-//         chrome.tabs.onRemoved.addListener(this.onRemove);
-//     }
-//
-//     onRemove(id) {
-//         const
-//             tab = this.cache.find(t => t.id === id),
-//             now = new Date(),
-//             open = new Date(this.cache[tab.index].time),
-//             spent = Math.ceil((now - open) / 1000);
-//
-//         GoogleAnalytics.sendEvent('Duration Time', `${spent}s`);
-//         GoogleAnalytics.sendEvent('Time Spent on Stream', ['On Link', 'Link', spent]);
-//
-//         this.cache[tab.index] = $.extend(tab, {id: null, time: null});
-//     }
-//
-//     open(url, index) {
-//         this.search(url).then().catch(() => {
-//             chrome.tabs.create({url: url}, (tab) => {
-//                 this.cache[index] = $.extend(this.cache[index] || {}, {
-//                     id: tab.id,
-//                     time: new Date().toISOString()
-//                 });
-//             });
-//         });
-//     }
-//
-//     search(url) {
-//         return new Promise((resolve, reject) => {
-//             chrome.tabs.query({}, (tabs) => {
-//                 if (tabs.find(t => t.url === url)) {
-//                     resolve();
-//                 } else {
-//                     reject();
-//                 }
-//             });
-//         });
-//     }
-//
-//     get(index) {
-//         return this.cache[index];
-//     }
-//
-//     set(index, data) {
-//         this.cache[index] = data;
-//     }
-// }
-
-// getCurrentEvent() {
-//     if (weekday !== 7) {
-//         for (let [key, event] of schedule.entries()) {
-//             if (event.day === DAY_MAP[weekday]) {
-//                 if (time >= event.start && time <= event.end) {
-//                 }
-//             }
-// }
-
-//
-// const openTabs = new Tabs();
-//
-// fetch('').then((res) => {
-//     if (res.status !== 200) {
-//         console.log('Couldn\'t retrieve vods');
-//         return;
-//     }
-//
-//     res.json().then((data) => {
-//         let videos = data['vodStartTimes'];
-//         if (videos.length !== 0) {
-//             localStorage.setItem('videos', JSON.stringify(videos));
-//         }
-//     });
-// }).catch(() => {
-//     console.log('Couldn\'t retrieve vods');
-// });
-//
-// const checkTime = () => {
-//     let
-//         schedule = new Map(JSON.parse(localStorage.getItem('schedule')));
-//
-//     let
-//         today = new Date(),
-//         weekday = today.getUTCDay(),
-//         time = today.toISOString().slice(10);
-//
-//     if (weekday !== 7) {
-//         for (let [key, event] of schedule.entries()) {
-//             if (event.day === DAY_MAP[weekday]) {
-//                 if (time >= event.start && time <= event.end) {
-//                     let index = openTabs.findIndex(t => t.id === key);
-//                     if (!openTabs[index].openStatus) {
-//                         createNotification(event.title);
-//                         openTabs.get(index).openStatus = true;
-//                         setTimeout(() => {
-//                             GoogleAnalytics.sendView(event.url);
-//                             GoogleAnalytics.sendEvent('Schedule Time', event.url);
-//                             openTabs.open(event.url, index);
-//                         }, 5000);
-//                     }
-//                 }
-//             }
-//         }
-//
-//         let
-//             openTab = openTabs.find(t => t.openStatus === true),
-//             icon = openTab ? 'live' : '19';
-//
-//         chrome.browserAction.setIcon({
-//             path: `assets/icon/${icon}.png`
-//         });
-//     }
-// };
-//
-// const updateSchedule = () => {
-//     for (let i in DAY_MAP) {
-//         $(`#${DAY_MAP[i]}-list`).empty();
-//     }
-//
-//     initSchedule();
-// };
-//
-// chrome.alarms.onAlarm.addListener((alarm) => {
-//     switch (alarm.name) {
-//         case 'checkTime':
-//             checkTime();
-//             break;
-//         case 'updateSchedule':
-//             updateSchedule();
-//             break;
-//     }
-// });
-//
-// chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-//     let
-//         prefix = 'https://www.twitch.tv/videos/';
-//
-//     if (details.url.indexOf(prefix) !== -1) {
-//         let
-//             videoID = details.url.substring(prefix.length, details.url.length),
-//             videos = JSON.parse(localStorage.getItem('videos')),
-//             video = videos.find(v => v['videoID'].toString() === videoID);
-//
-//         if (video) {
-//             let
-//                 redirectURL = `${details.url}?t=${video['videoStartTime']}`;
-//
-//             chrome.tabs.update(details.tabId, {url: redirectURL});
-//             ga('send', 'pageview', redirectURL);
-//             ga('send', 'event', 'Redirection', redirectURL);
-//         }
-//     }
-// });
-//
-// chrome.runtime.onInstalled.addListener((details) => {
-//     if (typeof ga === 'undefined') {
-//         new GoogleAnalytics(CONFIG.GOOGLE_ANALYTIC_ID);
-//     }
-//
-//     if (details.reason === 'install') {
-//         GoogleAnalytics.sendEvent('Info', 'Attack Chrome Extension Installed');
-//     } else if (details.reason === 'update') {
-//         GoogleAnalytics.sendEvent('Info', 'Attack Chrome Extension Updated');
-//     }
-// });
+import {createLiveNotification} from './utils';
 
 $(document).ready(() => {
     const GA = new GoogleAnalytics();
     const schedule = new Schedule();
+    const tabs = new Tabs();
+    const vod = new VOD();
+
+    schedule.register('eventLive', (key, event) => {
+        if (!tabs.isOpen(key)) {
+
+        } else {
+            chrome.browserAction.setIcon({path: 'assets/icon/live.png'});
+            createLiveNotification({message: `${event.title} is live. Opening new tab in 5 seconds`});
+            setTimeout(() => {
+                tabs.open(event.url, key);
+                GA.pageView(event.url);
+                GA.event('Schedule Time', [event.url]);
+            }, 5000);
+        }
+    });
+
+    schedule.register('eventOver', () => {
+        chrome.browserAction.setIcon({path: 'assets/icon/19.png'});
+    });
+
+    schedule.register('eventAdd', (key) => {
+        tabs.add(key);
+    });
+
     schedule.fetch().then(() => {
         schedule.render();
     }).catch(() => {
-        createNotification({message: 'Unable to fetch schedule'});
+        schedule.retrieve();
+        schedule.render();
     });
 
-    GA.event('Action', ['Attack Chrome Extension Start']);
+    schedule.startTimers();
+
+    vod.fetch().then(() => {
+        chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+            const prefix_url = "https://www.twitch.tv/videos/";
+            if (details.url.indexOf(prefix_url) !== -1) {
+                let
+                    id = details.url.substring(prefix_url.length, details.url.length),
+                    videos = JSON.parse(localStorage.getItem('videos')),
+                    video = videos.find(v => v['videoID'].toString() === id),
+                    redirectURL = `${details.url}?=video.videoStartTime`;
+                GA.pageView(redirectURL);
+                GA.event('Redirection', [redirectURL]);
+            }
+        });
+    }).catch(() => {
+    });
 
 
-    chrome.alarms.create('checkTime', {delayInMinutes: 0.5, periodInMinutes: 0.5});
-    chrome.alarms.create('updateSchedule', {delayInMinutes: 720, periodInMinutes: 720});
+    // Register Chrome events
+    chrome.tabs.onRemoved.addListener((id) => {
+        for (const {index, tab} of tabs.storage.entries()) {
+            if (tab.id === id) {
+                const
+                    now = new Date(),
+                    open = new Date(tab.time),
+                    spent = Math.ceil((now - open) / 1000);
+
+                GA.event('Duration Time', [`${spent}s`]);
+                GA.event('Time Spent on Stream', ['On Link', 'Link', spent]);
+                tab.id = null;
+                tab.time = null;
+                tabs.storage.set(index, tab);
+            }
+        }
+    });
+
+    chrome.runtime.onInstalled.addListener((details) => {
+        let message = '';
+        switch (details.reason) {
+            case 'install':
+                message = 'Attack Chrome Extension Installed';
+                break;
+            case 'update':
+                message = 'Attack Chrome Extension Updated';
+                break;
+        }
+
+        GA.event('Info', [message]);
+    });
 
     setTimeout(() => {
         const style = document.querySelector('.background').style;
@@ -195,4 +99,6 @@ $(document).ready(() => {
             style.opacity = 1;
         });
     }, 200);
+
+    GA.event('Action', ['Attack Chrome Extension Start']);
 });

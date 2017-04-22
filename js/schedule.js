@@ -3,9 +3,12 @@
 import * as $ from 'jquery';
 import {SCHEDULE_URL} from './config';
 import {DAY_MAP, COMMENT_REGEX} from './utils';
+import {ScheduleException} from './exceptions';
+import {Observer} from './observer';
 
-export class Schedule {
+export class Schedule extends Observer {
     constructor() {
+        super();
         this.storage = new Map();
     }
 
@@ -76,6 +79,7 @@ export class Schedule {
                 }
 
                 this.storage.set(id, $.extend(this.storage.get(id) || {}, event));
+                this.trigger('eventAdd', [id]);
             }
         }
 
@@ -93,6 +97,59 @@ export class Schedule {
      * Retrieve from the localStorage and rebuild the schedule map
      */
     retrieve() {
-        this.storage = new Map(JSON.parse(localStorage.getItem('schedule')));
+        const
+            data = localStorage.getItem('schedule');
+
+        if (data == null) {
+            throw ScheduleException('Unable to retrieve schedule from localStorage')
+        }
+
+        this.storage = new Map(JSON.parse(data));
+    }
+
+    /**
+     * Return the current event for the day within the current time frame
+     * @param day
+     * @returns {{Key: string, event: {}}}
+     */
+    getCurrentEvent(day) {
+        if (day !== 7) {
+            const time = new Date().toISOString().slice(10);
+            for (let [key, event] of this.storage.entries()) {
+                if (event.day === DAY_MAP[day]) {
+                    if (time >= event.start && time <= event.end) {
+                        return {Key: key, event: event};
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Start chrome alarm timers
+     */
+    startTimers() {
+        chrome.alarms.create('checkTime', {delayInMinutes: 0.5, periodInMinutes: 0.5});
+        chrome.alarms.create('updateSchedule', {delayInMinutes: 720, periodInMinutes: 720});
+
+        chrome.alarms.onAlarm.addListener((alarm) => {
+            switch (alarm) {
+                case 'checkTime':
+                    const {key, event} = this.getCurrentEvent(new Date().getDay());
+                    if (key && event) {
+                        this.trigger('eventLive', [key, event]);
+                    } else {
+                        this.trigger('eventOver', []);
+                    }
+                    break;
+                case 'updateSchedule':
+                    this.fetch().then(() => {
+                        this.render();
+                    }).catch(() => {
+                        new ScheduleException('Unable to update schedule');
+                    });
+                    break;
+            }
+        });
     }
 }
