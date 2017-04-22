@@ -14,8 +14,6 @@ $(document).ready(() => {
 
     schedule.register('eventLive', (key, event) => {
         if (!tabs.isOpen(key)) {
-
-        } else {
             chrome.browserAction.setIcon({path: 'assets/icon/live.png'});
             createLiveNotification({message: `${event.title} is live. Opening new tab in 5 seconds`});
             setTimeout(() => {
@@ -71,6 +69,7 @@ $(document).ready(() => {
 
                 GA.event('Duration Time', [`${spent}s`]);
                 GA.event('Time Spent on Stream', ['On Link', 'Link', spent]);
+                tab.open = false;
                 tab.id = null;
                 tab.time = null;
                 tabs.storage.set(index, tab);
