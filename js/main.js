@@ -99,6 +99,9 @@ $(document).ready(() => {
     }).catch(() => {
     });
 
+    // Hide the content until after 200s due to chrome resizing bug
+    // Can be fixed by implementing a loader and turning the schedule render into a resolving a promise
+    // then executing this code block after the promise is resolved
     setTimeout(() => {
         const style = document.querySelector('.background').style;
         style.display = 'block';
