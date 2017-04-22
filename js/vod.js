@@ -33,7 +33,7 @@ export class VOD {
     startTimer() {
         chrome.alarms.create('updateVOD', {delayInMinutes: 720, periodInMinutes: 720});
         chrome.alarms.onAlarm.addListener((alarm) => {
-            switch (alarm) {
+            switch (alarm.name) {
                 case 'updateVOD':
                     this.fetch().then(() => {
                         console.log('VOD updated')

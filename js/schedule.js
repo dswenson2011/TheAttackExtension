@@ -108,9 +108,9 @@ export class Schedule extends Observer {
     }
 
     /**
-     * Return the current event for the day within the current time frame
+     * Returns current event if any are live
      * @param day
-     * @returns {{Key: string, event: {}}}
+     * @returns {*}
      */
     getCurrentEvent(day) {
         if (day !== 7) {
@@ -118,11 +118,13 @@ export class Schedule extends Observer {
             for (let [key, event] of this.storage.entries()) {
                 if (event.day === DAY_MAP[day]) {
                     if (time >= event.start && time <= event.end) {
-                        return {Key: key, event: event};
+                        return {key, event};
                     }
                 }
             }
         }
+
+        return {};
     }
 
     /**
@@ -133,7 +135,7 @@ export class Schedule extends Observer {
         chrome.alarms.create('updateSchedule', {delayInMinutes: 720, periodInMinutes: 720});
 
         chrome.alarms.onAlarm.addListener((alarm) => {
-            switch (alarm) {
+            switch (alarm.name) {
                 case 'checkTime':
                     const {key, event} = this.getCurrentEvent(new Date().getDay());
                     if (key && event) {
