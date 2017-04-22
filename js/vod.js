@@ -21,7 +21,7 @@ export class VOD {
                 }
 
                 res.json().then((data) => {
-                    localStorage.setItem('videos', data);
+                    localStorage.setItem('videos', JSON.stringify(data));
                 }).catch(reject);
             }).catch(reject);
         });

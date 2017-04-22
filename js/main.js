@@ -6,12 +6,14 @@ import {VOD} from './vod';
 import {GoogleAnalytics} from './googleanalytics';
 import {createLiveNotification} from './utils';
 
+
 $(document).ready(() => {
     const GA = new GoogleAnalytics();
     const schedule = new Schedule();
     const tabs = new Tabs();
     const vod = new VOD();
 
+    // Register events
     schedule.register('eventLive', (key, event) => {
         if (!tabs.isOpen(key)) {
             chrome.browserAction.setIcon({path: 'assets/icon/live.png'});
@@ -32,6 +34,7 @@ $(document).ready(() => {
         tabs.add(key);
     });
 
+    // Fetch Data
     schedule.fetch().then(() => {
         schedule.render();
     }).catch(() => {
@@ -42,21 +45,8 @@ $(document).ready(() => {
     schedule.startTimers();
 
     vod.fetch().then(() => {
-        chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-            const prefix_url = "https://www.twitch.tv/videos/";
-            if (details.url.indexOf(prefix_url) !== -1) {
-                let
-                    id = details.url.substring(prefix_url.length, details.url.length),
-                    videos = JSON.parse(localStorage.getItem('videos')),
-                    video = videos.find(v => v['videoID'].toString() === id),
-                    redirectURL = `${details.url}?=video.videoStartTime`;
-                GA.pageView(redirectURL);
-                GA.event('Redirection', [redirectURL]);
-            }
-        });
     }).catch(() => {
     });
-
 
     // Register Chrome events
     chrome.tabs.onRemoved.addListener((id) => {
@@ -89,6 +79,23 @@ $(document).ready(() => {
         }
 
         GA.event('Info', [message]);
+    });
+
+
+    chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+        const prefix_url = "https://www.twitch.tv/videos/";
+        if (details.url.indexOf(prefix_url) !== -1) {
+            let
+                id = details.url.substring(prefix_url.length, details.url.length),
+                videos = JSON.parse(localStorage.getItem('videos'))['vodStartTimes'],
+                video = videos.find(v => v['videoID'].toString() === id);
+            if (video) {
+                let redirectURL = `${details.url}?t=${video['videoStartTime']}`;
+                GA.pageView(redirectURL);
+                GA.event('Redirection', [redirectURL]);
+                chrome.tabs.update(details.tabId, {url: redirectURL});
+            }
+        }
     });
 
     setTimeout(() => {
