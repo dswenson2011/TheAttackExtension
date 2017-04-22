@@ -13,11 +13,12 @@ In `js/config.js` extension configuration exists and should be modified to match
 ```
 const SCHEDULE_URL = 'https://sixtysixten.com/jsonData/theAttackSchedule.json';
 const VOD_URL = 'https://sixtysixten.com/jsonData/theAttackVOD.json';
-const GOOGLE_ANALYTIC_ID = '';
+const GOOGLE_ANALYTIC_ID = 'UA-96454610-1';
 const TWITCH_ID = 'iy3jp26zt4mxzihp5m5dxxzc4c198q';
 ```
 
 
 ## Build
 Now we want to build after configuring the extension.
+
 Run `./node_modules/.bin/webpack --config webpack.config.js` and a new directory called dist will be created with the built extension.

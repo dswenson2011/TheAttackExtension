@@ -6,14 +6,14 @@ import {DAY_MAP, COMMENT_REGEX} from './utils';
 
 export class Schedule {
     constructor() {
-        this.scheduleMap = new Map();
+        this.storage = new Map();
     }
 
     /**
      * Render the schedule into the UI
      */
     render() {
-        for (const [key, event] of this.scheduleMap.entries()) {
+        for (const [key, event] of this.storage.entries()) {
             const
                 currentDate = /.+?(?=T)/.exec(new Date().toISOString())[0],
                 start = new Date(currentDate + event.start).toLocaleTimeString([], {
@@ -71,11 +71,11 @@ export class Schedule {
                     },
                     id = event.title.replace(/\s/g, '') + event.day;
 
-                if (this.scheduleMap.has(id)) {
+                if (this.storage.has(id)) {
                     event = {end: event.end};
                 }
 
-                this.scheduleMap.set(id, $.extend(this.scheduleMap.get(id) || {}, event));
+                this.storage.set(id, $.extend(this.storage.get(id) || {}, event));
             }
         }
 
@@ -86,13 +86,13 @@ export class Schedule {
      * Persist the schedule map into localStorage
      */
     persist() {
-        localStorage.setItem('schedule', JSON.stringify([...this.scheduleMap]));
+        localStorage.setItem('schedule', JSON.stringify([...this.storage]));
     }
 
     /**
      * Retrieve from the localStorage and rebuild the schedule map
      */
     retrieve() {
-        this.scheduleMap = new Map(JSON.parse(localStorage.getItem('schedule')));
+        this.storage = new Map(JSON.parse(localStorage.getItem('schedule')));
     }
 }
