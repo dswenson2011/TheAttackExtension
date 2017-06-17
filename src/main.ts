@@ -1,12 +1,12 @@
 declare const chrome: any;
 declare const $: any;
 
-import { EventInterface, Schedule } from "./models/schedule";
-import { GoogleAnalytics } from "./models/googleanalytics";
-import { status } from "./models/tab";
-import { VODs } from "./collections/vods";
-import { Tabs } from "./collections/tabs";
-import { createLiveNotification } from "./utils";
+import {EventInterface, Schedule} from "./models/schedule";
+import {GoogleAnalytics} from "./models/googleanalytics";
+import {status} from "./models/tab";
+import {VODs} from "./collections/vods";
+import {Tabs} from "./collections/tabs";
+import {createLiveNotification} from "./utils";
 
 $(document).ready(() => {
     const GA = new GoogleAnalytics();
@@ -18,7 +18,7 @@ $(document).ready(() => {
         let tab;
 
         if (tab = tabs.get(key)) {
-            chrome.browserAction.setIcon({ path: 'assets/icon/live.png' });
+            chrome.browserAction.setIcon({path: 'assets/icon/live.png'});
             createLiveNotification(`${event.title} is live. Opening new tab in 5 seconds`);
             setTimeout(() => {
                 tab.open(event.url);
@@ -29,7 +29,7 @@ $(document).ready(() => {
     });
 
     schedule.register('eventOver', () => {
-        chrome.browserAction.setIcon({ path: 'assets/icon/19.png' });
+        chrome.browserAction.setIcon({path: 'assets/icon/19.png'});
     });
 
     schedule.register('eventAdd', (key) => {
@@ -37,7 +37,7 @@ $(document).ready(() => {
     });
 
     schedule.register('render', (entries) => {
-        for (const [key, event] of entries) {
+        for (const [, event] of entries) {
             const
                 currentDate = /.+?(?=T)/.exec(new Date().toISOString())[0],
                 start = new Date(currentDate + event.start).toLocaleTimeString([], {
@@ -57,7 +57,7 @@ $(document).ready(() => {
 
     // Register Chrome events
     chrome.tabs.onRemoved.addListener((id) => {
-        let index, tab;
+        let tab;
         if (tab = tabs.findBy(t => t.get('id') === id)) {
             const
                 now = new Date().getTime(),
@@ -97,7 +97,7 @@ $(document).ready(() => {
                 let redirectURL = `${details.url}?t=${video.get('StartTime')}`;
                 GA.pageView(redirectURL);
                 GA.event('Redirection', [redirectURL]);
-                chrome.tabs.update(details.tabId, { url: redirectURL });
+                chrome.tabs.update(details.tabId, {url: redirectURL});
             }
         }
     });
